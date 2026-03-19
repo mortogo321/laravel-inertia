@@ -5,6 +5,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     sqlite-dev \
+    gettext \
     curl \
     zip \
     unzip \
@@ -92,11 +93,25 @@ CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 # ------- Production stage -------
 FROM deploy AS production
 
-RUN cp .env.production .env \
+# CI/CD build args — override via: docker build --build-arg APP_URL_PRODUCTION=https://example.com
+ARG APP_NAME_PRODUCTION APP_KEY_PRODUCTION APP_DEBUG_PRODUCTION APP_URL_PRODUCTION
+ARG LOG_LEVEL_PRODUCTION
+ARG DB_CONNECTION_PRODUCTION DB_HOST_PRODUCTION DB_PORT_PRODUCTION DB_DATABASE_PRODUCTION DB_USERNAME_PRODUCTION DB_PASSWORD_PRODUCTION
+ARG SESSION_DOMAIN_PRODUCTION
+ARG MAIL_MAILER_PRODUCTION MAIL_SCHEME_PRODUCTION MAIL_HOST_PRODUCTION MAIL_PORT_PRODUCTION MAIL_USERNAME_PRODUCTION MAIL_PASSWORD_PRODUCTION MAIL_FROM_ADDRESS_PRODUCTION
+
+# Expand variables into .env (defaults defined in .env.production via :- syntax)
+RUN envsubst < .env.production > .env \
     && php artisan key:generate --force
 
 # ------- Staging stage -------
 FROM deploy AS staging
 
-RUN cp .env.staging .env \
+ARG APP_NAME_STAGING APP_KEY_STAGING APP_DEBUG_STAGING APP_URL_STAGING
+ARG LOG_LEVEL_STAGING
+ARG DB_CONNECTION_STAGING DB_HOST_STAGING DB_PORT_STAGING DB_DATABASE_STAGING DB_USERNAME_STAGING DB_PASSWORD_STAGING
+ARG SESSION_DOMAIN_STAGING
+ARG MAIL_MAILER_STAGING MAIL_SCHEME_STAGING MAIL_HOST_STAGING MAIL_PORT_STAGING MAIL_USERNAME_STAGING MAIL_PASSWORD_STAGING MAIL_FROM_ADDRESS_STAGING
+
+RUN envsubst < .env.staging > .env \
     && php artisan key:generate --force
