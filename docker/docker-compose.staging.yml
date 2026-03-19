@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: ../laravel
+      dockerfile: Dockerfile
+      additional_contexts:
+        docker: ../docker
+      target: staging
+    ports:
+      - "${APP_PORT:-8080}:80"
+    # .env is baked into the image (from .env.staging)
+    # Override at runtime if needed:
+    # env_file:
+    #   - ../laravel/.env.staging
+    restart: unless-stopped

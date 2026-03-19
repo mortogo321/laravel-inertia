@@ -1,6 +1,6 @@
 # Laravel 13 + Inertia.js v3 Beta Demo
 
-A comprehensive demo showcasing the latest features of **Laravel 13**, **Inertia.js v3 (beta)**, **Vue 3**, **Tailwind CSS 4**, and **Vite**.
+A comprehensive demo showcasing **Laravel 13**, **Inertia.js v3 (beta)**, **Vue 3**, **Tailwind CSS 4**, and **Vite**.
 
 ## Tech Stack
 
@@ -13,6 +13,53 @@ A comprehensive demo showcasing the latest features of **Laravel 13**, **Inertia
 | Tailwind CSS | 4.x |
 | Vite | 8.x |
 | PHP | 8.4 |
+
+## Project Structure
+
+```
+laravel-inertia/
+├── docker/                       Docker infrastructure
+│   ├── docker-compose.yml            Dev (hot reload, volume mounts)
+│   ├── docker-compose.prod.yml       Production (pre-built assets)
+│   ├── docker-compose.staging.yml    Staging
+│   ├── nginx.conf                    Nginx site config
+│   ├── supervisord-dev.conf          Supervisor for dev (php-fpm + nginx + vite)
+│   ├── supervisord-prod.conf         Supervisor for prod (php-fpm + nginx)
+│   └── entrypoint.sh                 Container entrypoint (migrate, seed, cache)
+│
+├── laravel/                      Laravel application
+│   ├── Dockerfile                    Multi-stage build (base → deps → dev / prod)
+│   ├── .dockerignore                 Docker build exclusions
+│   ├── Makefile                      Dev/prod/staging shortcuts
+│   ├── .env                          Local environment
+│   ├── .env.staging                  Staging environment
+│   ├── .env.production               Production environment
+│   ├── app/
+│   │   ├── Http/Controllers/         Feature demo controllers
+│   │   ├── Http/Middleware/           Inertia middleware
+│   │   ├── Models/                   Post, Comment, Tag, Notification, User
+│   │   └── Providers/                Service providers
+│   ├── resources/
+│   │   ├── css/app.css               Tailwind entry
+│   │   ├── js/app.js                 Vue + Inertia entry
+│   │   └── js/
+│   │       ├── Components/           FeatureBadge, CodeBlock
+│   │       ├── Layouts/              AppLayout (responsive nav, flash messages)
+│   │       └── Pages/                Vue pages per feature demo
+│   │           └── Posts/            CRUD pages (Index, Show, Create, Edit)
+│   ├── config/                       Laravel config files
+│   ├── database/
+│   │   ├── factories/                Model factories for seeding
+│   │   ├── migrations/               Schema definitions
+│   │   └── seeders/                  DatabaseSeeder with demo data
+│   ├── routes/web.php                All route definitions
+│   ├── composer.json                 PHP dependencies
+│   ├── package.json                  JS dependencies
+│   └── vite.config.js                Vite + Vue + Tailwind config
+│
+├── .gitignore                    Global ignores (OS, IDE)
+└── README.md                     This file
+```
 
 ## Feature Demos
 
@@ -29,19 +76,25 @@ A comprehensive demo showcasing the latest features of **Laravel 13**, **Inertia
 
 ## Getting Started
 
+All commands run from `laravel/`:
+
+```bash
+cd laravel
+```
+
 ### Local Development
 
 ```bash
-# Install dependencies
 composer install
 npm install
-
-# Setup environment
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
 
-# Run (two terminals)
+# Run everything (server + queue + logs + vite)
+composer dev
+
+# Or manually (two terminals)
 php artisan serve    # Terminal 1
 npm run dev          # Terminal 2
 ```
@@ -51,69 +104,50 @@ Visit http://localhost:8000
 ### Docker Development
 
 ```bash
-# First time (builds image + starts container)
-make dev-build
-
-# Subsequent runs
-make dev
-
-# Seed database
-make seed
+make dev-build    # First time (builds image + starts container)
+make dev          # Subsequent runs
+make seed         # Seed database
 ```
 
 Visit http://localhost (Vite HMR on port 5173)
 
-### Docker Production
+### Docker Production / Staging
 
 ```bash
-make prod-build
+make prod-build   # Production  → http://localhost
+make staging      # Staging     → http://localhost:8080
 ```
 
-### Docker Staging
+## Make Commands
 
-```bash
-make staging
-```
-
-## Docker Multi-Environment
+Run from `laravel/`:
 
 | Command | Description |
 |---|---|
 | `make dev` | Start dev with hot reload (Vite HMR + volume mounts) |
 | `make dev-build` | Build and start dev |
+| `make dev-down` | Stop dev containers |
 | `make restart` | Restart container (picks up `.env` changes, no rebuild) |
 | `make prod` | Start production |
 | `make prod-build` | Build and start production |
+| `make prod-down` | Stop production containers |
 | `make staging` | Start staging |
+| `make staging-down` | Stop staging containers |
 | `make logs` | Tail container logs |
 | `make shell` | Shell into container |
 | `make seed` | Fresh migrate + seed |
 | `make fresh` | Destroy volumes and rebuild from scratch |
 
-### Environment Configuration
+## Environment Configuration
 
-- **Dev**: Volume mounts for instant code changes, Vite HMR for frontend hot reload
-- **Staging/Prod**: Pre-built assets, optimized autoloader, cached config/routes
+| File | `APP_ENV` | `APP_DEBUG` | `LOG_LEVEL` | `SESSION_ENCRYPT` |
+|---|---|---|---|---|
+| `.env` | local | true | debug | false |
+| `.env.staging` | staging | true | debug | false |
+| `.env.production` | production | false | error | true |
+
 - `.env` changes apply with `make restart` — no rebuild needed
-
-## Project Structure
-
-```
-app/
-  Http/Controllers/      # Feature demo controllers
-  Models/                 # Post, Comment, Tag, Notification
-resources/
-  js/
-    Components/           # FeatureBadge, CodeBlock
-    Layouts/              # AppLayout (responsive nav, flash messages)
-    Pages/                # Vue pages per feature demo
-      Posts/              # CRUD pages (Index, Show, Create, Edit)
-docker/                   # Nginx, Supervisor, entrypoint configs
-database/
-  factories/              # Model factories for seeding
-  migrations/             # Schema definitions
-  seeders/                # DatabaseSeeder with demo data
-```
+- `APP_KEY` is auto-generated by the container entrypoint if not set
 
 ## License
 

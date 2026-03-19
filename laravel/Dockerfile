@@ -41,16 +41,16 @@ COPY . .
 
 RUN composer dump-autoload
 
-# Nginx config
-COPY docker/nginx.conf /etc/nginx/http.d/default.conf
-COPY docker/supervisord-dev.conf /etc/supervisor/conf.d/supervisord.conf
+# Nginx & supervisor config from docker context
+COPY --from=docker nginx.conf /etc/nginx/http.d/default.conf
+COPY --from=docker supervisord-dev.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Ensure storage & cache dirs are writable
 RUN mkdir -p storage/framework/{cache/data,sessions,testing,views} \
     storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --from=docker entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 80 5173
@@ -58,8 +58,8 @@ EXPOSE 80 5173
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 
-# ------- Production build stage -------
-FROM base AS production
+# ------- Deployable base stage -------
+FROM base AS deploy
 
 COPY --from=deps /var/www/html/vendor ./vendor
 COPY --from=deps /var/www/html/node_modules ./node_modules
@@ -71,18 +71,30 @@ RUN npm run build && rm -rf node_modules
 
 RUN composer dump-autoload --optimize
 
-# Nginx config
-COPY docker/nginx.conf /etc/nginx/http.d/default.conf
-COPY docker/supervisord-prod.conf /etc/supervisor/conf.d/supervisord.conf
+# Nginx & supervisor config from docker context
+COPY --from=docker nginx.conf /etc/nginx/http.d/default.conf
+COPY --from=docker supervisord-prod.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN mkdir -p storage/framework/{cache/data,sessions,testing,views} \
     storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --from=docker entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+# ------- Production stage -------
+FROM deploy AS production
+
+RUN cp .env.production .env \
+    && php artisan key:generate --force
+
+# ------- Staging stage -------
+FROM deploy AS staging
+
+RUN cp .env.staging .env \
+    && php artisan key:generate --force
