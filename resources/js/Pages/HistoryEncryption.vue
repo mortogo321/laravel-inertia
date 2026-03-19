@@ -7,14 +7,16 @@ defineProps({
     sensitiveData: Object,
 })
 
-const serverCode = `// Enable history encryption per-page
+const serverCode = `// Enable history encryption for this request
+Inertia::encryptHistory();
+
 return Inertia::render('HistoryEncryption', [
     'sensitiveData' => [
         'apiKey' => 'sk-demo-' . Str::random(32),
         'secretToken' => Str::random(64),
         'userEmail' => 'admin@example.com',
     ],
-])->encryptHistory();
+]);
 
 // Or globally in middleware:
 // Inertia::encryptHistory();

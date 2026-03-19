@@ -15,8 +15,9 @@ const loading = ref(false)
 
 function loadMore() {
     loading.value = true
-    router.reload({
-        data: { page: props.page + 1 },
+    router.get('/merge-props', { page: props.page + 1 }, {
+        preserveState: true,
+        preserveScroll: true,
         only: ['items', 'page', 'hasMore'],
         onFinish: () => { loading.value = false },
     })
