@@ -2,10 +2,6 @@
 .DS_Store
 Thumbs.db
 
-# Dependencies
-node_modules
-vendor
-
 # IDE
 .idea
 .vscode
