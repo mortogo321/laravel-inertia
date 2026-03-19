@@ -10,9 +10,7 @@ class InfiniteScrollController extends Controller
     public function __invoke()
     {
         return Inertia::render('InfiniteScroll', [
-            'posts' => Inertia::merge(
-                Post::latest()->paginate(10)
-            )->append('data'),
+            'posts' => Inertia::scroll(fn () => Post::latest()->paginate(10)),
         ]);
     }
 }

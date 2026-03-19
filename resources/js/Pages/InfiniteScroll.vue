@@ -9,9 +9,8 @@ defineProps({
 })
 
 const serverCode = `return Inertia::render('InfiniteScroll', [
-    'posts' => Inertia::merge(
-        Post::latest()->paginate(10)
-    )->append('data'),
+    // Inertia::scroll() auto-configures merge + pagination metadata
+    'posts' => Inertia::scroll(fn () => Post::latest()->paginate(10)),
 ]);`
 </script>
 
@@ -29,7 +28,7 @@ const serverCode = `return Inertia::render('InfiniteScroll', [
             </div>
         </div>
 
-        <CodeBlock title="Server-side — Inertia::merge() + append('data')" :code="serverCode" lang="php" />
+        <CodeBlock title="Server-side — Inertia::scroll()" :code="serverCode" lang="php" />
 
         <div class="text-sm text-gray-500 mb-4">
             Showing {{ posts.data.length }} of {{ posts.total }} posts — scroll down to load more
