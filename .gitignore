@@ -3,6 +3,7 @@
 .env
 .env.backup
 .env.production
+.env.staging
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -22,3 +23,10 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Database
+*.sqlite
+*.sqlite-journal
+
+# Docker volumes
+docker-compose.override.yml
