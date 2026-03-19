@@ -34,7 +34,7 @@ A comprehensive demo showcasing the latest features of **Laravel 13**, **Inertia
 ```bash
 # Install dependencies
 composer install
-npm install
+bun install
 
 # Setup environment
 cp .env.example .env
@@ -43,7 +43,7 @@ php artisan migrate --seed
 
 # Run (two terminals)
 php artisan serve    # Terminal 1
-npm run dev          # Terminal 2
+bun run dev          # Terminal 2
 ```
 
 Visit http://localhost:8000

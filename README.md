@@ -86,7 +86,7 @@ cd laravel
 
 ```bash
 composer install
-npm install
+bun install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
@@ -96,7 +96,7 @@ composer dev
 
 # Or manually (two terminals)
 php artisan serve    # Terminal 1
-npm run dev          # Terminal 2
+bun run dev          # Terminal 2
 ```
 
 Visit http://localhost:8000

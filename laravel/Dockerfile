@@ -5,12 +5,14 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     sqlite-dev \
-    nodejs \
-    npm \
     curl \
     zip \
     unzip \
     git
+
+# Install Bun
+COPY --from=oven/bun:latest /usr/local/bin/bun /usr/local/bin/bun
+RUN ln -s /usr/local/bin/bun /usr/local/bin/bunx
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_sqlite pcntl
@@ -26,8 +28,8 @@ FROM base AS deps
 COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-autoloader --prefer-dist
 
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
 # ------- Development stage -------
 FROM base AS development
@@ -67,7 +69,7 @@ COPY --from=deps /var/www/html/node_modules ./node_modules
 COPY . .
 
 # Build frontend assets
-RUN npm run build && rm -rf node_modules
+RUN bun run build && rm -rf node_modules
 
 RUN composer dump-autoload --optimize
 
