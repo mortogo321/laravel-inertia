@@ -37,8 +37,6 @@ composer install
 bun install
 
 # Setup environment
-cp .env.example .env
-php artisan key:generate
 php artisan migrate --seed
 
 # Run (two terminals)

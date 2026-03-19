@@ -87,8 +87,6 @@ cd laravel
 ```bash
 composer install
 bun install
-cp .env.example .env
-php artisan key:generate
 php artisan migrate --seed
 
 # Run everything (server + queue + logs + vite)
