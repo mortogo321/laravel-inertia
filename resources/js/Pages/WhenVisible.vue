@@ -59,7 +59,8 @@ const serverCode = `return Inertia::render('WhenVisible', [
         </div>
 
         <!-- WhenVisible: Popular Posts -->
-        <WhenVisible data="popularPosts" class="mb-8">
+        <div class="mb-8">
+        <WhenVisible data="popularPosts">
             <template #fallback>
                 <div class="bg-white rounded-xl shadow-sm border p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Popular Posts</h2>
@@ -80,11 +81,13 @@ const serverCode = `return Inertia::render('WhenVisible', [
                 </div>
             </div>
         </WhenVisible>
+        </div>
 
         <div class="h-32"></div>
 
         <!-- WhenVisible: Recent Comments -->
-        <WhenVisible data="recentComments" class="mb-8">
+        <div class="mb-8">
+        <WhenVisible data="recentComments">
             <template #fallback>
                 <div class="bg-white rounded-xl shadow-sm border p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Comments</h2>
@@ -105,6 +108,7 @@ const serverCode = `return Inertia::render('WhenVisible', [
                 </div>
             </div>
         </WhenVisible>
+        </div>
 
         <div class="h-32"></div>
 
