@@ -3,7 +3,7 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import FeatureBadge from '@/Components/FeatureBadge.vue'
 import CodeBlock from '@/Components/CodeBlock.vue'
 import { usePoll } from '@inertiajs/vue3'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps({
     notifications: Array,
@@ -11,12 +11,24 @@ const props = defineProps({
     randomMetric: Number,
 })
 
-const { start, stop, polling } = usePoll(2000, {
+const pollActive = ref(false)
+
+const { start, stop } = usePoll(2000, {
     only: ['notifications', 'serverTime', 'randomMetric'],
+    onStart() { pollActive.value = true },
+}, {
     autoStart: false,
 })
 
-const pollActive = computed(() => polling.value)
+function togglePoll() {
+    if (pollActive.value) {
+        stop()
+        pollActive.value = false
+    } else {
+        start()
+        pollActive.value = true
+    }
+}
 
 const serverCode = `return Inertia::render('Polling', [
     'notifications' => Notification::latest()->take(10)->get(),
@@ -25,10 +37,9 @@ const serverCode = `return Inertia::render('Polling', [
 ]);
 
 // Client-side:
-// const { start, stop, polling } = usePoll(2000, {
+// const { start, stop } = usePoll(2000, {
 //     only: ['notifications', 'serverTime', 'randomMetric'],
-//     autoStart: false,
-// })`
+// }, { autoStart: false })`
 </script>
 
 <template>
@@ -50,7 +61,7 @@ const serverCode = `return Inertia::render('Polling', [
         <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
             <div class="flex items-center gap-4">
                 <button
-                    @click="pollActive ? stop() : start()"
+                    @click="togglePoll"
                     class="px-6 py-2 rounded-lg font-medium transition-colors"
                     :class="pollActive ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'"
                 >
